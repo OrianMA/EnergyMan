@@ -14,7 +14,7 @@ AEnergyBall::AEnergyBall()
 	RootComponent = SphereMeshComponent;
 
 	// Chargez un mesh de sphère existant pour le UStaticMeshComponent.
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("Engine/BasicShapes/Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("Content/Materials/EnergySphere_Inst.uasset"));
 
 	if (SphereMeshAsset.Succeeded())
 	{
@@ -32,7 +32,15 @@ AEnergyBall::AEnergyBall()
 		{
 			// Attaquez le Material Instance Dynamic au UStaticMeshComponent.
 			SphereMeshComponent->SetMaterial(0, DynamicMaterialInstance); // 0 est l'index du matériau que vous souhaitez remplacer.
+			UE_LOG(LogTemp, Warning, TEXT("DynamicMaterialInstance attached successfully!"));
 		}
+		else
+		{
+			// Ajoutez un message de débogage en cas d'échec de création du DynamicMaterialInstance.
+			UE_LOG(LogTemp, Error, TEXT("Failed to create DynamicMaterialInstance!"));
+		}
+	}else {
+		UE_LOG(LogTemp, Error, TEXT("ParentMaterial is invalid!"));
 	}
 
 }
@@ -43,7 +51,39 @@ void AEnergyBall::BeginPlay()
 	isDestroy = false;
 	Super::BeginPlay();
 	//energyBallMaterial->SetScalarParameterValueEditorOnly("JouleIntensity", currentJouleIntesity);
-	GetWorldTimerManager().SetTimer(Handle, this, &AEnergyBall::IncrementDecrementInTime, 0.2f, true, 2.0f);
+	GetWorldTimerManager().SetTimer(Handle, this, &AEnergyBall::IncrementDecrementInTime, delayBetweenVariation, true, 6.0f);
+
+	// Créez une instance de matériau dynamique à partir du matériau parent.
+	DynamicMaterialInstance = UMaterialInstanceDynamic::Create(ParentMaterial, nullptr);
+
+	// Assurez-vous que l'instance de matériau dynamique est valide avant de l'attacher au UStaticMeshComponent.
+	if (DynamicMaterialInstance)
+	{
+		// Attaquez le Material Instance Dynamic au UStaticMeshComponent.
+		SphereMeshComponent->SetMaterial(0, DynamicMaterialInstance); // 0 est l'index du matériau que vous souhaitez remplacer.
+		UE_LOG(LogTemp, Warning, TEXT("DynamicMaterialInstance attached successfully!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create DynamicMaterialInstance!"));
+	}
+
+	distance = FMath::Abs(CurrentJoule - minValueExpodential);
+	intensity = FMath::Pow(distance, ExponentialStrength);
+
+	if (intensity < 1.0f)
+	{
+		intensity = 1.0f / intensity;
+	}
+
+	currentJouleIntesity = CurrentJoule * intensity;
+
+	if (DynamicMaterialInstance)
+	{
+		DynamicMaterialInstance->SetScalarParameterValue("JouleIntensity", currentJouleIntesity);
+
+		DynamicMaterialInstance->SetVectorParameterValue("ColorDiffuse", ExponentialColorChange(BaseColor, ExponentialStrengthColor, (CurrentTemperature - minTemp) / (maxTemp - minTemp)));
+	}
 }
 
 // Called every frame
@@ -65,13 +105,30 @@ void AEnergyBall::IncrementJoule(int jouleToUpdate)
 {
 	if (!isDestroy) {
 		CurrentJoule += jouleToUpdate;
-		currentJouleIntesity += IntensityWhenIncrease;
-		DynamicMaterialInstance->SetScalarParameterValue("JouleIntensity", currentJouleIntesity);
+
+		distance = FMath::Abs(CurrentJoule - minValueExpodential);
+		intensity = FMath::Pow(distance, ExponentialStrength);
+
+		if (intensity < 1.0f)
+		{
+			intensity = 1.0f / intensity;
+		}
+
+		currentJouleIntesity = CurrentJoule * intensity;
+		//DynamicMaterialInstance->SetScalarParameterValue("JouleIntensity", currentJouleIntesity);
 		//energyBallMaterial->SetScalarParameterValueEditorOnly("JouleIntensity",  currentJouleIntesity);
 		if (CurrentJoule > maxJoule) {
 			DestroyBall();
 		}
 		else {
+
+			if (DynamicMaterialInstance)
+			{
+				DynamicMaterialInstance->SetScalarParameterValue("JouleIntensity", currentJouleIntesity);
+
+				DynamicMaterialInstance->SetVectorParameterValue("ColorDiffuse", ExponentialColorChange(BaseColor, ExponentialStrengthColor, (CurrentTemperature - minTemp) / (maxTemp - minTemp)));
+			}
+
 			if (panelStats)
 				panelStats->UpdateUIText(FName("CurrentJoule"), CurrentJoule);
 		}
@@ -81,14 +138,34 @@ void AEnergyBall::IncrementJoule(int jouleToUpdate)
 void AEnergyBall::DecrementJoule(int jouleToUpdate)
 {	
 	if (!isDestroy) {
+
 		CurrentJoule -= jouleToUpdate;
-		currentJouleIntesity -= IntensityWhenIncrease;
+
+		distance = FMath::Abs(CurrentJoule - minValueExpodential);
+		intensity = FMath::Pow(distance, ExponentialStrength);
+
+		if (intensity < 1.0f)
+		{
+			intensity = 1.0f / intensity;
+		}
+
+		currentJouleIntesity = CurrentJoule * intensity;
+
+		UE_LOG(LogTemp, Error, TEXT("%f"), currentJouleIntesity);
 		//energyBallMaterial->SetScalarParameterValueEditorOnly("JouleIntensity", currentJouleIntesity);
 
 		if (CurrentJoule < minJoule) {
 			DestroyBall();
 		}
 		else {
+
+			if (DynamicMaterialInstance)
+			{
+				DynamicMaterialInstance->SetScalarParameterValue("JouleIntensity", currentJouleIntesity);
+
+				DynamicMaterialInstance->SetVectorParameterValue("ColorDiffuse", ExponentialColorChange(BaseColor, ExponentialStrengthColor, (CurrentTemperature - minTemp) / (maxTemp - minTemp)));
+			}
+
 			if (panelStats)
 				panelStats->UpdateUIText(FName("CurrentJoule"), CurrentJoule);
 		}
@@ -154,4 +231,29 @@ void AEnergyBall::DestroyBall()
 		panelStats->UpdateUIText(FName("MinTemp"), FText::FromString("ERROR"));
 		panelStats->UpdateUIText(FName("MaxTemp"), FText::FromString("ERROR"));
 	}
+}
+
+
+FLinearColor AEnergyBall::ExponentialColorChange(FLinearColor _BaseColor, float _ExponentialStrength, float Progress)
+{
+	// Clamp progress between 0 and 1
+	Progress = FMath::Clamp(Progress, 0.0f, 1.0f);
+
+	// Calculate the inverse progress
+	float InverseProgress = 1.0f - Progress;
+
+	// Apply exponential strength to progress and inverse progress
+	float ExponentialProgress = FMath::Pow(Progress, _ExponentialStrength);
+	float ExponentialInverseProgress = FMath::Pow(InverseProgress, _ExponentialStrength);
+
+	// Interpolate the color between blue and red based on exponential progress
+	FLinearColor BlueColor = FLinearColor::Blue;
+	FLinearColor RedColor = FLinearColor::Red;
+
+	FLinearColor InterpolatedColor = FLinearColor::LerpUsingHSV(BlueColor, RedColor, ExponentialProgress);
+
+	// Combine the interpolated color with the base color using the exponential inverse progress
+	FLinearColor ResultColor = FLinearColor::LerpUsingHSV(_BaseColor, InterpolatedColor, ExponentialInverseProgress);
+
+	return ResultColor;
 }

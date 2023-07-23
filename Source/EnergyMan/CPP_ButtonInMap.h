@@ -28,24 +28,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "public variables")
 		bool IsIncrease;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		class UStaticMeshComponent* MeshToChangeMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		UMaterial* ButtonMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		UMaterialInstanceDynamic* dynamicMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		FLinearColor ColorInDisable;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		FLinearColor ColorInHold;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-		FLinearColor ColorInEnable;
-
 	//In cpp class
 	class ACPP_MainCharacter* currentCharacter;
 	FTimerHandle Handle;

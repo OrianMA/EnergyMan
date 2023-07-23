@@ -45,12 +45,25 @@ public:
 		float maxTemp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material Proprety")
-		float IntensityWhenIncrease;
+		float minValueExpodential = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material Proprety")
-		float IntensityWhenDecrease;
+		float ExponentialStrength = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material Proprety")
 		float currentJouleIntesity;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material Proprety")
+		FLinearColor BaseColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material Proprety")
+		float ExponentialStrengthColor;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Joule and Temp variation")
+		float delayBetweenVariation = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Joule and Temp variation")
 		int SpeedJouleVariation;
@@ -64,6 +77,8 @@ public:
 
 	bool isDestroy;
 
+	float distance;
+	float intensity;
 
 
 private:
@@ -89,5 +104,7 @@ public:
 	void IncrementDecrementInTime();
 
 	void DestroyBall();
+
+	FLinearColor ExponentialColorChange(FLinearColor _BaseColor, float _ExponentialStrength, float Progress);
 
 };
