@@ -73,3 +73,18 @@ void ACPP_StatsPanelInMan::UpdateUIText(FName nameText, FText text)
 	}
 }
 
+void ACPP_StatsPanelInMan::ChangeColor(FName name, FLinearColor color) {
+
+	UUserWidget* WidgetClass = CurrentPanelStats->GetUserWidgetObject();
+
+	if (WidgetClass) {
+
+		UCPP_EnergyBallPanelStats* WidgetInstance = Cast<UCPP_EnergyBallPanelStats>(WidgetClass);
+
+		if (WidgetInstance)
+		{
+			WidgetInstance->SetColorAndOpacity(color);
+		}
+	}
+}
+

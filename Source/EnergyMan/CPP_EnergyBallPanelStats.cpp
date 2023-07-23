@@ -30,6 +30,8 @@ void UCPP_EnergyBallPanelStats::ChangeText(FName name, FText text)
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *MyMessage);
 	}
 }
+
+
 //void UCPP_EnergyBallPanelStats::Tick(float DeltaTime)
 //{
 //	Super::Tick(DeltaTime);

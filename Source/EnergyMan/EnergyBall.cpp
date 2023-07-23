@@ -216,10 +216,10 @@ void AEnergyBall::IncrementDecrementInTime()
 		}
 
 		if (CurrentJoule > (maxJoule - minJoule) / 2) {
-			IncrementTemperature(FMath::RoundToInt(SpeedTempVariation * (Difficulty * 0.4f)));
+			IncrementTemperature(SpeedTempVariation * (Difficulty * 0.4f));
 		}
 		else {
-			DecrementTemperature(SpeedTempVariation * (Difficulty * 0.4f));
+			DecrementTemperature(FMath::RoundToInt(SpeedTempVariation * (Difficulty * 0.4f)));
 		}
 
 		DecrementJoule(SpeedJouleVariation);
@@ -240,6 +240,14 @@ void AEnergyBall::DestroyBall()
 		panelStats->UpdateUIText(FName("CurrentTemp"), FText::FromString("ERROR"));
 		panelStats->UpdateUIText(FName("MinTemp"), FText::FromString("ERROR"));
 		panelStats->UpdateUIText(FName("MaxTemp"), FText::FromString("ERROR"));
+
+		panelStats->ChangeColor(FName("CurrentJoule"), FLinearColor::Red);
+		panelStats->ChangeColor(FName("MinJoule"), FLinearColor::Red);
+		panelStats->ChangeColor(FName("MaxJoule"), FLinearColor::Red);
+
+		panelStats->ChangeColor(FName("CurrentTemp"), FLinearColor::Red);
+		panelStats->ChangeColor(FName("MinTemp"), FLinearColor::Red);
+		panelStats->ChangeColor(FName("MaxTemp"), FLinearColor::Red);
 	}
 }
 

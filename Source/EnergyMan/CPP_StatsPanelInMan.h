@@ -32,4 +32,6 @@ public:
 	void UpdateUIText(FName nameText, float value);
 	void UpdateUIText(FName nameText, FText text);
 
+	void ChangeColor(FName name, FLinearColor color);
+
 };
