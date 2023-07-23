@@ -68,6 +68,8 @@ void AEnergyBall::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Failed to create DynamicMaterialInstance!"));
 	}
 
+	SetActorHiddenInGame(true);
+
 	distance = FMath::Abs(CurrentJoule - minValueExpodential);
 	intensity = FMath::Pow(distance, ExponentialStrength);
 
@@ -205,11 +207,19 @@ void AEnergyBall::DecrementTemperature(float temperatureToDecrease)
 void AEnergyBall::IncrementDecrementInTime()
 {
 	if (!isDestroy) {
+		SetActorHiddenInGame(false);
+		indexDifficultyIncrease++;
+
+		if (indexDifficultyIncrease % maxIndexDifficultyIncrease) {
+			indexDifficultyIncrease = 0;
+			Difficulty++;
+		}
+
 		if (CurrentJoule > (maxJoule - minJoule) / 2) {
-			IncrementTemperature(SpeedTempVariation);
+			IncrementTemperature(FMath::RoundToInt(SpeedTempVariation * (Difficulty * 0.4f)));
 		}
 		else {
-			DecrementTemperature(SpeedTempVariation);
+			DecrementTemperature(SpeedTempVariation * (Difficulty * 0.4f));
 		}
 
 		DecrementJoule(SpeedJouleVariation);
@@ -236,7 +246,21 @@ void AEnergyBall::DestroyBall()
 
 FLinearColor AEnergyBall::ExponentialColorChange(FLinearColor _BaseColor, float _ExponentialStrength, float Progress)
 {
-	// Clamp progress between 0 and 1
+
+
+
+	FLinearColor StartColor = FLinearColor::Blue; // Couleur de départ
+	FLinearColor EndColor = FLinearColor::Red; // Couleur d'arrivée
+
+	// Calculer la progression entre les deux couleurs (valeur de 0 à 1)
+	//Progress = CalculateProgress(Progress, StartValue, EndValue);
+
+	// Interpoler la couleur entre StartColor et EndColor en fonction de la progression
+	return FLinearColor::LerpUsingHSV(StartColor, EndColor, Progress);
+
+
+
+	/*// Clamp progress between 0 and 1
 	Progress = FMath::Clamp(Progress, 0.0f, 1.0f);
 
 	// Calculate the inverse progress
@@ -255,5 +279,5 @@ FLinearColor AEnergyBall::ExponentialColorChange(FLinearColor _BaseColor, float 
 	// Combine the interpolated color with the base color using the exponential inverse progress
 	FLinearColor ResultColor = FLinearColor::LerpUsingHSV(_BaseColor, InterpolatedColor, ExponentialInverseProgress);
 
-	return ResultColor;
+	return ResultColor; */
 }

@@ -81,6 +81,11 @@ public:
 	float intensity;
 
 
+	int indexDifficultyIncrease;
+	int maxIndexDifficultyIncrease = 30;
+	int Difficulty;
+
+
 private:
 
 	FTimerHandle Handle;
